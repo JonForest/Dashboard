@@ -1,0 +1,17 @@
+/* 
+    Document   : default
+    Created on : Sep 28, 2013, 6:42:13 PM
+    Author     : jonforest
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+root { 
+    display: block;
+}
+
+.link {
+    font-size: 16px;
+    padding: 5px;
+}
+
