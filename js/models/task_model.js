@@ -6,6 +6,7 @@
 
 ablefutures.tasks.model = Backbone.Model.Extend(
 {
+    
     defaults : {
         title : "",
         targetDate : "",

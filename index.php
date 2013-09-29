@@ -32,7 +32,22 @@
             <button class="btn btn-add">Add</button>
         </script>
 
-        <script sfsdfd>
+        <script type="text/template" id="task-template">
+            <tr>
+                <td><%=get.model('description')%></td>
+                <td><%=get.model
+            <button type='button' class='close' data-dismiss='alert'>&times;</button>
+        </script>
+        
+        <script type="text/template" id="tasks-template">
+            <table>
+                <tr>
+                    <th>Task</th>
+                    <th>Date</th>
+                    <th></th>
+                </tr>
+
+        </script>
         
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
         <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
