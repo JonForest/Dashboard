@@ -31,7 +31,23 @@
         <script type="text/template" id="items-template">
             <button class="btn btn-add">Add</button>
         </script>
+
+        <script type="text/template" id="task-template">
+            <tr>
+                <td><%=get.model('description')%></td>
+                <td><%=get.model
+            <button type='button' class='close' data-dismiss='alert'>&times;</button>
+        </script>
         
+        <script type="text/template" id="tasks-template">
+            <table>
+                <tr>
+                    <th>Task</th>
+                    <th>Date</th>
+                    <th></th>
+                </tr>
+
+        </script>
         
         <script type="text/template" id="task-template">
             This is a test
