@@ -15,3 +15,10 @@ root {
     padding: 5px;
 }
 
+
+.done {
+    color: grey;
+}
+.table tbody tr:hover td {
+  background-color: #AABBFF;
+}
