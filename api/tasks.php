@@ -1,25 +1,22 @@
 <?php
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+require "common/magicquotes.php";
+require "common/dbconnection.php";
 
 
-
-function addTask ($con, $task)
+function addTask (mysqli $con, $task)
 {
     //1. Add task to database and retrieve ID
     //2. Retrieve all key/LastUpdated pairs
     //3. Send to client
     //4. Client works out which ones have been updated elsewhere and requests further information on these
     //5. Information is provided, client updates
-    $sql = "INSERT INTO Tasks (dateAdded,dateUpdated,description,catId, dueDate) VALUES (NOW(),NOW(),?,?, '2013-04-07')";
+    $sql = "INSERT INTO Tasks (dateAdded,dateUpdated,description,catId, dueDate) VALUES (NOW(),NOW(),?,1,?)";
 
     //type hinting
     /* @var $con mysqli */
     $stmt = $con->prepare($sql);
-    $stmt->bind_param("si",$task->description,$task->catId);
+    $stmt->bind_param("ss",$task->description,$task->dueDate);
     $stmt->execute();
     
     //Retrieve the last Id
@@ -27,19 +24,20 @@ function addTask ($con, $task)
     $taskId = mysqli_insert_id($con);
     
     //Use Id to select the last record entered
-    $sql = "select t.taskId, t.description, t.catId ,c.description, t.dateAdded from Tasks t inner join Categories c on t.catId = c.catId WHERE taskId=?";
+    $sql = "select t.taskId, t.description, t.catId ,c.description, t.dateAdded, t.status from Tasks t inner join Categories c on t.catId = c.catId WHERE taskId=?";
     $stmt = $con->prepare($sql);
     $stmt->bind_param("i",$taskId);
     $stmt->execute();
-    $stmt->bind_result($taskId, $description, $catId,$catDesc, $dateAdded);
+    $stmt->bind_result($taskId, $description, $catId,$catDesc, $dateAdded, $status);
     
     while ($stmt->fetch()) 
     {
-        $task->taskId = $taskId;
+        $task->id = $taskId;
         $task->description = $description;
         $task->catId = $catId;
         $task->catDesc = $catDesc;
         $task->dateAdded = $dateAdded;
+        $task->status = $status;
     }
     //var_dump($task);
     $stmt->close();
@@ -50,36 +48,19 @@ function addTask ($con, $task)
 //using another method of type-hinting in parameters
 function updateTask(mysqli $con, $task)
 {
-    $retTask = new Task();
-    $sql = "UPDATE  Tasks SET dateUpdated=NOW(),description=?,catId=? WHERE taskId=?";
+    //$task = json_decode($_REQUEST)
+    
+   // $retTask = new Task();
+    $sql = "UPDATE  Tasks SET dateUpdated=NOW(),description=?,catId=?, status=? WHERE taskId=?";
 
 
     $stmt = $con->prepare($sql);
-    $stmt->bind_param("sii",$task->description,$task->catId,$task->taskId);
+    $stmt->bind_param("siii",$task->description,$task->catId,$task->status,$task->id);
     $stmt->execute();
-    
-    //Retrieve the last Id
-    //echo mysqli_insert_id($con);
-    //$taskId = mysqli_insert_id($con);
-    
-    //Use Id to select the last record entered
-    $sql = "select t.taskId, t.description, t.catId ,c.description, t.dateAdded from Tasks t inner join Categories c on t.catId = c.catId WHERE taskId=?";
-    $stmt = $con->prepare($sql);
-    $stmt->bind_param("i",$task->taskId);
-    $stmt->execute();
-    $stmt->bind_result($taskId, $description, $catId,$catDesc, $dateAdded);
-    
-    while ($stmt->fetch()) 
-    {
-        $retTask->taskId = $taskId;
-        $retTask->description = $description;
-        $retTask->catId = $catId;
-        $retTask->catDesc = $catDesc;
-        $retTask->dateAdded = $dateAdded;
-    }
-    //var_dump($row);
+    $taskId = $task->id; 
+
     $stmt->close();
-    return $retTask;
+    return (array('id'=>$taskId));
 }
 
 function completedeleteTask($con, $taskId, $action) 
@@ -105,14 +86,14 @@ function retrieveAll($con)
     $stmt = $con->prepare($sql);
     $stmt->execute();
     $stmt->bind_result($dateAdded,$dateUpdated, $taskId,$description,$catId,$catDesc,$status);
-    //$result =  mysqli_query($con, $sql);
+
     $tasks = array();
     
     while ($stmt->fetch()) {
         $task = new Task();
         $task->dateAdded = $dateAdded;
         $task->lastUpdated = $dateUpdated;
-        $task->taskId = $taskId;
+        $task->id = $taskId;
         $task->description = $description;
         $task->catId = $catId;
         $task->catDesc = $catDesc;
@@ -274,7 +255,7 @@ function syncUpdates($con, $dateUpdated, $jsonUpdates, $taskId)
 
 class Task {
     public $result = true;  //to be depreciated
-    public $taskId;
+    public $Id;
     public $localTaskId;
     public $dateAdded;
     public $lastUpdated;
@@ -291,105 +272,81 @@ class Category {
     public $catDesc;
     public $status;
 }
-//We'll always need the database
-//$con=mysqli_connect("localhost","taskUser", "HopperMyD0g", "Taskerv1");
-//$con=new mysqli("localhost","taskUser", "HopperMyD0g", "Taskerv1");
-$con=new mysqli("localhost","ablef014_task", "HopperMyD0g", "ablef014_TaskMan");
-/* check connection */
-if (mysqli_connect_errno($con))
-{
-    echo "Failed to connect to MySQL: " . mysqli_connect_error();
-}
-//
 
 
-//echo "Connecting..";
-//switch ($_POST('action')) {
-switch ($_POST["action"]) {
-    case "RetrieveAll":
+$method = $_SERVER['REQUEST_METHOD'];
+
+
+switch ($method) {
+    case "GET":
+        //Get all tasks
         echo json_encode(retrieveAll($con));
-        //echo'{"result":true,"taskId":108,"dateAdded":"2013-05-11 13:30:52","lastUpdated":null,"description":"See if I can batch thumbnail images for Jos mum","owner":null,"catId":8,"catDesc":"None","dueDate":null,"status":1},{"result":true,"taskId":118,"dateAdded":"2013-05-21 21:31:35","lastUpdated":null,"description":"Life insurance","owner":null,"catId":13,"catDesc":"New Zealand","dueDate":null,"status":1}';
         break;
-
-    
-    case "Add":
-        $task = new Task();
-        $task->description=$_POST["description"];
-        $task->catId=$_POST["catId"];
-        echo json_encode(addTask($con,$task));
-        break;
-    
-    case "Update":
-        $task = new Task();
-        $task->taskId=$_POST["taskId"];
-        $task->description=$_POST["description"];
-        $task->catId=$_POST["catId"];
-        //var_dump($task);
-        echo json_encode(updateTask($con,$task));
-        break;
-    
-    case "Done":
-        echo json_encode(completedeleteTask($con,$_POST["taskId"],2));
-        break;
-    
-    case "Delete":
-        echo json_encode(completedeleteTask($con,$_POST["taskId"],3));
-        break;
-    
-    case "GetCategories" :
-        //dump_var($con);
-        echo json_encode(getCategories($con));
-        break;
-    
-    case "AddCategory" :
-        echo json_encode (addCategory($con,$_POST["description"]));
-        break;
-    
-    case "JSONSync" :
-        //echo json_decode($_POST["syncdata"],$_POST["dateUpdated"],$_POST["jsonUpdates"]);
-        /*echo "In JSONSync";
-        echo $_POST["jsonUpdates"];
-        $tasks = json_decode($_POST["jsonUpdates"]);
-        echo $tasks[0]->task;
-        echo "Number of items: ".count($tasks);*/
-        echo json_encode(syncUpdates($con, $_POST["dateUpdated"], $_POST["jsonUpdates"]));
+    case "POST":
+        $task = json_decode(file_get_contents("php://input"));
+        echo json_encode(addTask($con, $task));
         
-        
-        
-        
-    
-    /*
-      case "Update":
         break;
-    
-    case "RetrievePair":
+    case "PUT":
+        $task = json_decode(file_get_contents("php://input"));
+        echo json_encode(updateTask($con, $task));
         break;
-    
-    
-    
-    case "RetrieveSpecific":
+    case "DELETE":
         break;
-    
-    
-    
-    case "Delete":
-        break;*/
-    //default :
+        
 }
 
-
-//We'll always close the database
- mysqli_close($con);        
-
-/*
-$task = new Task();
-if ($_POST["action"] == "Add") {
-    $task->taskId = 2;  
-}
-else {
-    $task->taskId = $_POST["taskId"];
-}
-
-echo json_encode($task);
-*/
-?>
+//
+//switch ($_POST["action"]) {
+//    case "RetrieveAll":
+//        echo json_encode(retrieveAll($con));
+//        //echo'{"result":true,"taskId":108,"dateAdded":"2013-05-11 13:30:52","lastUpdated":null,"description":"See if I can batch thumbnail images for Jos mum","owner":null,"catId":8,"catDesc":"None","dueDate":null,"status":1},{"result":true,"taskId":118,"dateAdded":"2013-05-21 21:31:35","lastUpdated":null,"description":"Life insurance","owner":null,"catId":13,"catDesc":"New Zealand","dueDate":null,"status":1}';
+//        break;
+//
+//    
+//    case "Add":
+//        $task = new Task();
+//        $task->description=$_POST["description"];
+//        $task->catId=$_POST["catId"];
+//        echo json_encode(addTask($con,$task));
+//        break;
+//    
+//    case "Update":
+//        $task = new Task();
+//        $task->taskId=$_POST["taskId"];
+//        $task->description=$_POST["description"];
+//        $task->catId=$_POST["catId"];
+//        //var_dump($task);
+//        echo json_encode(updateTask($con,$task));
+//        break;
+//    
+//    case "Done":
+//        echo json_encode(completedeleteTask($con,$_POST["taskId"],2));
+//        break;
+//    
+//    case "Delete":
+//        echo json_encode(completedeleteTask($con,$_POST["taskId"],3));
+//        break;
+//    
+//    case "GetCategories" :
+//        //dump_var($con);
+//        echo json_encode(getCategories($con));
+//        break;
+//    
+//    case "AddCategory" :
+//        echo json_encode (addCategory($con,$_POST["description"]));
+//        break;
+//    
+//    case "JSONSync" :
+//        //echo json_decode($_POST["syncdata"],$_POST["dateUpdated"],$_POST["jsonUpdates"]);
+//        /*echo "In JSONSync";
+//        echo $_POST["jsonUpdates"];
+//        $tasks = json_decode($_POST["jsonUpdates"]);
+//        echo $tasks[0]->task;
+//        echo "Number of items: ".count($tasks);*/
+//        echo json_encode(syncUpdates($con, $_POST["dateUpdated"], $_POST["jsonUpdates"]));
+//        
+//        
+//        
+//
+//}
