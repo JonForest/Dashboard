@@ -4,9 +4,12 @@
  */
 
 
-ablefutures.tasks.collection = Backbone.collections(
-{
-    url : "/api/tasks/"
+var ablefutures = ablefutures || {collections : {}, app : {}, views : {}, models : {}};
+
+ablefutures.collections.tasks = Backbone.Collection.extend({
+    model: ablefutures.models.task,
+    
+    url : "api/tasks.php"
     
     
-});
+});;

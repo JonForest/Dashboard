@@ -5,10 +5,11 @@
 
 var ablefutures = ablefutures || {collections : {}, app : {}, views : {}, models : {}};
 
-ablefutures.views.link = Backbone.View.extend({
-    className: 'link',
+ablefutures.views.task = Backbone.View.extend({
+    tagName: 'tr',
+    className: 'rowHighlight',
     events : {
-        'click button' : 'remove'
+        'click span.glyphicon-unchecked' : 'markRead'
     },
     
     initialize : function () {
@@ -17,7 +18,7 @@ ablefutures.views.link = Backbone.View.extend({
     
     render : function () {
         this.$el.empty();
-        var compiled = _.template($('#item-template').html(), 
+        var compiled = _.template($('#task-template').html(), 
                         {model : this.model});
                         
         this.$el.append(compiled);
@@ -26,10 +27,13 @@ ablefutures.views.link = Backbone.View.extend({
         
     },
     
-    remove : function(e) {
-        //TODO: Currently alert does not fire
-        this.model.destroy({'url': 'api/deleteLinks.php?id=' + this.model.get('id'),
-                        'success' :  function() { bootbox.alert('Removed'); } });
-    } 
+    markRead :  function(e) {
+        e.stopPropagation();
+
+        this.model.save('status',2);
+
+        Backbone.Events.trigger('refresh:tasks', this.model.collection);
+        //this.trigger('refresh:tasks');
+    }
 });
 
