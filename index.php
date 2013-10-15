@@ -102,17 +102,17 @@
         <script src="js/assets/bootbox.min.js"></script>
         <script src="js/assets/bootstrap-datepicker.js"></script>
         
-        <script src="js/apps/links_app.js"></script>
-        <script src="js/models/link_model.js"></script>
-        <script src="js/collections/links_collection.js"></script>
-        <script src="js/views/links_view.js"></script>
-        <script src="js/views/link_view.js"></script>
+        <script src="js/links/links_app.js"></script>
+        <script src="js/links/link_model.js"></script>
+        <script src="js/links/links_collection.js"></script>
+        <script src="js/links/links_view.js"></script>
+        <script src="js/links/link_view.js"></script>
         
-        <script src="js/apps/tasks_app.js"></script>
-        <script src="js/models/task_model.js"></script>
-        <script src="js/collections/tasks_collection.js"></script>
-        <script src="js/views/tasks_view.js"></script>
-        <script src="js/views/task_view.js"></script>
+        <script src="js/tasks/tasks_app.js"></script>
+        <script src="js/tasks/task_model.js"></script>
+        <script src="js/tasks/tasks_collection.js"></script>
+        <script src="js/tasks/tasks_view.js"></script>
+        <script src="js/tasks/task_view.js"></script>
             
         <script src="js/spin.min.js"></script>
         
