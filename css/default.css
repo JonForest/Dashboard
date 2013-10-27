@@ -22,3 +22,21 @@ root {
 .table tbody tr:hover td {
   background-color: #AABBFF;
 }
+
+
+.verticalseparator {
+    height: 50px;
+}
+
+#notes {
+    height: 300px;
+}
+
+.content {
+    height:300px;
+}
+
+.editting {
+    border: 2px solid #fbed50;
+}
+

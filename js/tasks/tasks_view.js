@@ -30,7 +30,7 @@ ablefutures.views.tasks = Backbone.View.extend({
         var els = new Array();
 
         _.each(collection, function(model) {
-            if (model.get('status') != 3) {
+            if (model.get('status') !== 3) {
                 var task = new ablefutures.views.task({model:model}); 
                 els.push(task.render().$el);
                 task.on('refresh:tasks', this.render);
@@ -74,7 +74,7 @@ ablefutures.views.tasks = Backbone.View.extend({
             
     saveAndNext :function(e) {
         e.stopPropagation();
-        this.saveAndSend(e)
+        this.saveAndSend(e);
     },
             
     saveAndSend : function(e) {
@@ -83,10 +83,8 @@ ablefutures.views.tasks = Backbone.View.extend({
         var data = {description : description, dueDate : dueDate, status : 1};
         that = this;
         
-        //Dont't want this, need to model.save
         this.collection.create(data, {success : function() {
-                $(e.target).parents('.modal').find('input').val('');
-                //that.render();      
+                $(e.target).parents('.modal').find('input').val('');    
         } });
     },        
     
@@ -101,19 +99,23 @@ ablefutures.views.tasks = Backbone.View.extend({
         //loop through all task and set status top 3
         _.each(this.collection.models, function(model) {
             if (model.get('status') === 2) {
-                model.set('status',3);
-                model.save();
+                //model.set('status',3);
+                model.save({'id': model.get('id'), 'status':3}, {
+                                        url: 'api/tasks.php?action=update',
+                                        method: 'POST',
+                                        success: function() { 
+                                            that.render();
+                                        } } );
             }
         });
         Backbone.Events.trigger('refresh:tasks');
-    },
+    }//,
     
-    datePicker : function(e) {
-        e.stopPropagation();
-        $(e.target).datepicker();
-        //TODO: work out why this doesn't fire on the first click into the box
-        //Or rather, may fire, but does not display
-    }
+//    datePicker : function(e) {
+//        console.log('datePicker clicked');
+//        //e.stopPropagation();
+//       // $(e.target).datepicker({format: 'yyyy-mm-dd'});
+//    }
    
 });
 

@@ -46,11 +46,10 @@ ablefutures.views.links = Backbone.View.extend({
                                         url: 'api/saveLinks.php',
                                         method: 'POST',
                                         success: function() { 
-                                            bootbox.alert('saved'); 
                                             that.render();
                                         },
                                         error: function() { bootbox.alert('failed to save'); }
-                })
+                });
             } 
       });
         
