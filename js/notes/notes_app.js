@@ -5,16 +5,16 @@
 
 var ablefutures = ablefutures || {collections : {}, app : {}, views : {}, models : {}};
 
-ablefutures.app.tasks = function () {
-    var tasksView;
+ablefutures.app.notes = function () {
+    var notesView;
     
     function init() 
     {
-        var tasks = new ablefutures.collections.tasks();
-        tasks.fetch({
+        var notes = new ablefutures.collections.notes();
+        notes.fetch({
             success : function (collection, response, options) {
-                tasksView = new ablefutures.views.tasks({collection:collection, el : '#tasks'});
-                renderTasks();
+                notesView = new ablefutures.views.notes({collection:collection, el : '#notes'});
+                renderNotes();
             },
             error : function (collection, response, options) {
                 console.log('Error retrieving links - ' + response);
@@ -27,14 +27,13 @@ ablefutures.app.tasks = function () {
         //var taskView = new ablefutures.views.task();
         //Backbone.Events.on("refresh:tasks",this.refreshTasks);
         //TODO: Make events work
-        Backbone.Events.on("refresh:tasks", renderTasks, this); // listen out for this event
+        Backbone.Events.on("refresh:notes", renderNotes, this); // listen out for this event
     }
     
-
-    function renderTasks() 
+    function renderNotes() 
     {
-
-        tasksView.render();
+        
+        notesView.render();
     }
 
     

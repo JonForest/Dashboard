@@ -8,8 +8,10 @@ var ablefutures = ablefutures || {collections : {}, app : {}, views : {}, models
 ablefutures.views.task = Backbone.View.extend({
     tagName: 'tr',
     className: 'rowHighlight',
+   
     events : {
-        'click span.glyphicon-unchecked' : 'markRead'
+        'click span.glyphicon-unchecked' : 'markRead',
+        'click span.glyphicon-check' : 'markUnread',
     },
     
     initialize : function () {
@@ -30,10 +32,29 @@ ablefutures.views.task = Backbone.View.extend({
     markRead :  function(e) {
         e.stopPropagation();
 
-        this.model.save('status',2);
+        this.model.save({'id': this.model.get('id'), 'status':2}, {
+                                        url: 'api/tasks.php?action=update',
+                                        method: 'POST',
+                                        success: function() { 
+                                            that.render();
+                                        } } );
 
         Backbone.Events.trigger('refresh:tasks', this.model.collection);
         //this.trigger('refresh:tasks');
+    },
+    
+    markUnread :  function(e) {
+        e.stopPropagation();
+
+        //TODO: Think about refactoring this and markRead into one function
+        this.model.save({'id': this.model.get('id'), 'status':1}, {
+                                        url: 'api/tasks.php?action=update',
+                                        method: 'POST',
+                                        success: function() { 
+                                            that.render();
+                                        } } );
+
+        Backbone.Events.trigger('refresh:tasks', this.model.collection);
     }
 });
 
