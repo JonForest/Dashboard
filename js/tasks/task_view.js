@@ -31,6 +31,8 @@ ablefutures.views.task = Backbone.View.extend({
     
     markRead :  function(e) {
         e.stopPropagation();
+        
+        var that = this;
 
         this.model.save({'id': this.model.get('id'), 'status':2}, {
                                         url: 'api/tasks.php?action=update',
@@ -45,6 +47,7 @@ ablefutures.views.task = Backbone.View.extend({
     
     markUnread :  function(e) {
         e.stopPropagation();
+        var that = this;
 
         //TODO: Think about refactoring this and markRead into one function
         this.model.save({'id': this.model.get('id'), 'status':1}, {

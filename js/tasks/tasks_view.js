@@ -81,7 +81,7 @@ ablefutures.views.tasks = Backbone.View.extend({
         var description = $(e.target).parents('.modal').find('#description').val();
         var dueDate = $(e.target).parents('.modal').find('#dueDate').val();
         var data = {description : description, dueDate : dueDate, status : 1};
-        that = this;
+        var that = this;
         
         this.collection.create(data, {success : function() {
                 $(e.target).parents('.modal').find('input').val('');    
@@ -97,6 +97,8 @@ ablefutures.views.tasks = Backbone.View.extend({
             
     cleanTasks : function(e) {
         //loop through all task and set status top 3
+        var that = this;
+        
         _.each(this.collection.models, function(model) {
             if (model.get('status') === 2) {
                 //model.set('status',3);
